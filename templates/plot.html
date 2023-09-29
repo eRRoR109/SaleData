@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Данные о продажах</title>
+</head>
+<body>
+    {{ graph_html | safe }}
+    <form action="/generate_plot" method="post">
+
+        <input type="submit" name="period" value="6m">
+        <input type="submit" name="period" value="1y">
+        <input type="submit" name="period" value="all">
+        <br>
+        <select name="test">
+            <option value="Audi">Audi</option>
+            <option value="SUZUKI">SUZUKI</option>
+            <option value="Hyundai">Hyundai</option>
+            <option value="SsangYong">SsangYong</option>
+            <option value="All">All</option>
+        </select>
+        <input type="submit" value="Отправить">
+    </form>
+</body>
+</html>

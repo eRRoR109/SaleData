@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sale Data</title>
+    <!-- Подключите необходимые библиотеки Plotly, CSS, JS здесь -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+test
+    <div>
+        <div>
+            <form id="filterForm">
+                <label for="vendor">Vendor:</label>
+                <select id="vendor" name="vendor">
+                    <option value="all">All</option>
+                    <option value="Audi">Audi</option>
+                    <option value="SUZUKI">SUZUKI</option>
+                </select>
+                <label for="model">Model:</label>
+                <select id="model" name="model">
+                    <option value="all">All</option>
+                    <!-- Здесь добавьте ваши варианты моделей -->
+                </select>
+                <label for="dealer">Dealer:</label>
+                <select id="dealer" name="dealer">
+                    <option value="all">All</option>
+                    <option value="1">1</option>
+                </select>
+                <label for="date_range">Date Range:</label>
+                <select id="date_range" name="date_range">
+                    <option value="all">All</option>
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                    <option value="6m">6 Months</option>
+                    <option value="1y">1 Year</option>
+                </select>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div>
+    <p>Среднее значение: <span id="mean"></span></p>
+    <p>Изменение в процентах: <span id="pchange"></span></p>
+</div>
+
+        <div id="plotly_chart"><!-- Здесь будет отображаться график --></div>
+
+        <div>
+            <button class="time-button" data-time="1m">1 Month</button>
+            <button class="time-button" data-time="3m">3 Months</button>
+            <button class="time-button" data-time="6m">6 Months</button>
+            <button class="time-button" data-time="1y">1 Year</button>
+            <button class="time-button" data-time="all">All</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript для отправки данных формы и обновления графика
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/plot', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var plotlyChart = document.getElementById('plotly_chart');
+                Plotly.newPlot(plotlyChart, JSON.parse(data.fig_json));
+
+            });
+        });
+
+        // JavaScript для обработки нажатий на кнопки временных интервалов
+        document.querySelectorAll('.time-button').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var selectedTime = this.getAttribute('data-time');
+                var dateRangeSelect = document.getElementById('date_range');
+                dateRangeSelect.value = selectedTime;
+
+                var formData = new FormData(document.getElementById('filterForm'));
+                fetch('/plot', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var plotlyChart = document.getElementById('plotly_chart');
+                    Plotly.newPlot(plotlyChart, JSON.parse(data.fig_json));
+
+
+                    var meanElement = document.getElementById('mean');
+                    meanElement.textContent = `${data.mean}`;
+
+                    var pchangeElement = document.getElementById('pchange');
+                    pchangeElement.textContent = `${data.pchange}`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
