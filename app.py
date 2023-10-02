@@ -3,9 +3,26 @@ from genplot import generate_plot
 
 app = Flask(__name__)
 
-@app.route('/')
+
+@app.route('/')  # Главная страница (index.html)
 def index():
     return render_template('index.html')
+
+
+@app.route('/login')  # Страница с входом
+def login():
+    return render_template('login.html')
+
+
+@app.route('/registration')  # Страница с регистрацией
+def registration():
+    return render_template('registration.html')
+
+
+@app.route('/analysis')  # Страница с графиками/данными
+def analysis():
+    return render_template('analysis.html')
+
 
 @app.route('/plot', methods=['POST'])
 def plot():
@@ -22,6 +39,7 @@ def plot():
     )
 
     return jsonify({'fig_json': fig_json, 'mean': mean, 'pchange': pchange})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

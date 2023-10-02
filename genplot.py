@@ -26,7 +26,7 @@ def generate_plot(selected_date_range='all', selected_vendor='all', selected_mod
     elif selected_date_range == '1y':
         sale_data = sale_data[sale_data["date"] >= sale_data["date"][sale_data.index[-1]] - pd.DateOffset(years=1)]
     else:
-        ...  
+        ...
 
     # Фильтрация по выбранной марке
     if selected_vendor == 'all':
