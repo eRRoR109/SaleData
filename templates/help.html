@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<HTML lang="ru">
+<HTML lang="en">
 <HEAD>
     <META charset="UTF-8">
     <META name="viewport" content="width=device-width, initial-scale=1.0">
-    <TITLE>DDSale</TITLE>
+    <TITLE> О сервисе </TITLE>
     <LINK rel="shortcut icon" href="DR.png" type="image/png">
     <STYLE>
         body {
@@ -27,12 +27,12 @@
             align-items: center;
         }
 
-        .help {
+        .return {
             display: flex;
             align-items: center;
         }
 
-        .help-button {
+        .return-button {
             background: #c0c0c0;
             border: 2px solid #7a7b7e;
             padding: 5px 10px;
@@ -57,7 +57,7 @@
         }
 
         .content {
-            margin: 50px;
+            margin: 5px;
             flex-grow: 1;
             display: flex;
             justify-content: center;
@@ -66,43 +66,25 @@
         }
 
         .analysis-container {
-            margin: 0px;
-        }
-
-        .analysis-button {
-            background-color: #008CBA;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 15px;
+            margin: 10px;
         }
 
     </STYLE>
 </HEAD>
 <BODY>
     <HEADER>
-        <DIV class="help">
-            <a href="help" class="help-button" style="text-decoration: none;"> О сервисе </a>
-            <DIV class="search">
-                <INPUT type="text" placeholder="Поиск по сайту...">
-            </DIV>
-        </DIV>
-        <DIV class="login">
-            <a href="login" class="login-button" style="text-decoration: none;"> Вход на сайт </a>
+        <DIV class="return">
+            <a href="javascript:history.back()" class="return-button" style="text-decoration: none;"> Вернуться на главную страницу... </a>
         </DIV>
     </HEADER>
 
     <DIV class="content">
-
+        <p>
+            <b>Данный сервис создан для автодилеров.</b>
+        </p>
+        <p>
+            Данный сервис создан для автодилеров.
+        </p>
     </DIV>
-
-    <DIV class="analysis-container">
-        <a href="analysis" class="analysis-button"> Анализ </a>
-    </DIV>
-
 </BODY>
 </HTML>

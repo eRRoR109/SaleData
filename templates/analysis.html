@@ -1,61 +1,158 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Sale Data</title>
+<HEAD>
+    <META charset="UTF-8">
+    <META name="viewport" content="width=device-width, initial-scale=1.0">
+    <TITLE>DDSale</TITLE>
     <!-- Подключите необходимые библиотеки Plotly, CSS, JS здесь -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
-test
-    <div>
-        <div>
-            <form id="filterForm">
-                <label for="vendor">Vendor:</label>
-                <select id="vendor" name="vendor">
-                    <option value="all">All</option>
-                    <option value="Audi">Audi</option>
-                    <option value="SUZUKI">SUZUKI</option>
-                </select>
-                <label for="model">Model:</label>
-                <select id="model" name="model">
-                    <option value="all">All</option>
-                    <!-- Здесь добавьте ваши варианты моделей -->
-                </select>
-                <label for="dealer">Dealer:</label>
-                <select id="dealer" name="dealer">
-                    <option value="all">All</option>
-                    <option value="1">1</option>
-                </select>
-                <label for="date_range">Date Range:</label>
-                <select id="date_range" name="date_range">
-                    <option value="all">All</option>
-                    <option value="1m">1 Month</option>
-                    <option value="3m">3 Months</option>
-                    <option value="6m">6 Months</option>
-                    <option value="1y">1 Year</option>
-                </select>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-        <div>
-    <p>Среднее значение: <span id="mean"></span></p>
-    <p>Изменение в процентах: <span id="pchange"></span></p>
-</div>
+    <LINK rel="shortcut icon" href="DR.png" type="image/png">
+    <STYLE>
+        body {
+            font-family: Times New Roman, sans-serif;
+            background: #c0c0c0;
+            text-align: center;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            justify-content: space-between;
+        }
 
-        <div id="plotly_chart"><!-- Здесь будет отображаться график --></div>
+        header {
+            font-family: Times New Roman, sans-serif;
+            background: #00c4ff;
+            border: 3px solid #7a7b7e;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        <div>
-            <button class="time-button" data-time="1m">1 Month</button>
-            <button class="time-button" data-time="3m">3 Months</button>
-            <button class="time-button" data-time="6m">6 Months</button>
-            <button class="time-button" data-time="1y">1 Year</button>
-            <button class="time-button" data-time="all">All</button>
-        </div>
-    </div>
+        .help {
+            display: flex;
+            align-items: center;
+        }
+
+        .help-button {
+            background: #c0c0c0;
+            border: 2px solid #7a7b7e;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+        .return {
+            display: flex;
+            align-items: center;
+        }
+
+        .return-button {
+            background: #c0c0c0;
+            border: 2px solid #7a7b7e;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+        .search input {
+            margin-left: 10px;
+            border: 2px solid #7a7b7e;
+            padding: 5px;
+        }
+
+        .login-button {
+            background: #c0c0c0;
+            border: 2px solid #7a7b7e;
+            color: black;
+            padding: 5px 10px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 15px;
+        }
+
+        .content {
+            margin: 50px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .analysis-container {
+            margin: 0px;
+        }
+
+        .analysis-button {
+            background-color: #008CBA;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 15px;
+        }
+
+    </STYLE>
+</HEAD>
+<BODY>
+    <HEADER>
+        <DIV class="help">
+            <a href="help" class="help-button" style="text-decoration: none;"> О сервисе </a>
+        </DIV>
+        <DIV class="return">
+            <a href="javascript:history.back()" class="return-button" style="text-decoration: none;"> Выйти из системы... </a>
+        </DIV>
+    </HEADER>
+
+    <DIV align="left">
+        <form id="filterForm" action="/plot" method="post">
+        <label for="ind">Выбор индекса:</label>
+        <select id="ind" name="ind">
+            <option value="Ins_mov">Мгновенный скользящий</option>
+            <option value="Ins_y-y">Мгновенный год-год</option>
+            <option value="Cur_mov">Текущий скользящий</option>
+            <option value="Cur_y-y">Текущий год-год</option>
+            <option value="Long_y-y">Длинный год-год</option>
+        </select>
+
+        <label for="type">Тип:</label>
+        <select id="type" name="type">
+            <option value="Контракт">Контракт</option>
+            <option value="Расторжение">Расторжение</option>
+        </select>
+
+        <label for="vendor">Марка:</label>
+        <select id="vendor" name="vendor">
+            <option value="all_v">All</option>
+            <option value="Audi">Audi</option>
+            <option value="SUZUKI">SUZUKI</option>
+            <option value="SsangYong">SsangYong</option>
+            <option value="Hyundai">Hyundai</option>
+        </select>
+
+        <label for="dealer">Дилер:</label>
+        <select id="dealer" name="dealer">
+            <option value="all_d">All</option>
+            <option value="d1">1</option>
+            <option value="d2">2</option>
+            <option value="d26">26</option>
+        </select>
+
+        <label for="startdate">Дата начала:</label>
+        <input type="date" id="startdate" name="startdate">
+        <label for="enddate">Дата конца:</label>
+        <input type="date" id="enddate" name="enddate">
+        <input type="submit" value="Отправить">
+    </form>
+    </DIV>
+
+    <div id="plotly_chart"><!-- Здесь будет отображаться график --></div>
 
     <script>
-        // JavaScript для отправки данных формы и обновления графика
         document.getElementById('filterForm').addEventListener('submit', function(event) {
             event.preventDefault();
             var formData = new FormData(this);
@@ -70,33 +167,6 @@ test
 
             });
         });
-
-        // JavaScript для обработки нажатий на кнопки временных интервалов
-        document.querySelectorAll('.time-button').forEach(function(button) {
-            button.addEventListener('click', function() {
-                var selectedTime = this.getAttribute('data-time');
-                var dateRangeSelect = document.getElementById('date_range');
-                dateRangeSelect.value = selectedTime;
-
-                var formData = new FormData(document.getElementById('filterForm'));
-                fetch('/plot', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    var plotlyChart = document.getElementById('plotly_chart');
-                    Plotly.newPlot(plotlyChart, JSON.parse(data.fig_json));
-
-
-                    var meanElement = document.getElementById('mean');
-                    meanElement.textContent = `${data.mean}`;
-
-                    var pchangeElement = document.getElementById('pchange');
-                    pchangeElement.textContent = `${data.pchange}`;
-                });
-            });
-        });
     </script>
-</body>
+</BODY>
 </html>

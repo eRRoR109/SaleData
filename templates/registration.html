@@ -1,12 +1,121 @@
-<body>
-Регистрация:
-<form action="/register" method="post">
-    <label for="username">Имя пользователя:</label>
-    <input type="text" id="username" name="username" required><br><br>
-    <label for="email">Почта:</label>
-    <input type="email" id="email" name="email" required><br><br>
-    <label for="password">Пароль:</label>
-    <input type="password" id="password" name="password" required><br><br>
-    <input type="submit" value="Зарегистрироваться">
-</form>
-</body>
+<HEAD xmlns="http://www.w3.org/1999/html">
+    <META charset="UTF-8">
+    <META name="viewport" content="width=device-width, initial-scale=1.0">
+    <TITLE> Авторизация </TITLE>
+    <LINK rel="shortcut icon" href="DR.png" type="image/png">
+    <STYLE>
+        body {
+            font-family: Times New Roman, sans-serif;
+            background: #c0c0c0;
+            text-align: center;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            justify-content: space-between;
+        }
+
+        header {
+            font-family: Times New Roman, sans-serif;
+            background: #00c4ff;
+            border: 3px solid #7a7b7e;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            width: 100%;
+            background: #c0c0c0;
+
+        .help {
+            display: flex;
+            align-items: center;
+        }
+
+        .help-button {
+            background: #c0c0c0;
+            border: 2px solid #7a7b7e;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+        .reg {
+            display: flex;
+            align-items: center;
+        }
+
+        .content {
+            margin: 10px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .form_box {
+            position: relative;
+            width: 350px;
+            height: 400px;
+            background: #00c4ff;
+            border: 3px solid #7a7b7e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register {
+            font-size: .9em;
+            color: #fff;
+            text-align: center;
+            margin: 25px 0 10px;
+        }
+
+        .return {
+            display: flex;
+            align-items: center;
+        }
+
+        .return-button {
+            background: #c0c0c0;
+            border: 2px solid #7a7b7e;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+
+    </STYLE>
+</HEAD>
+<BODY>
+    <HEADER>
+        <DIV class="help">
+            <a href="help" class="help-button" style="text-decoration: none;"> О сервисе </a>
+        </DIV>
+        <DIV class="return">
+            <a href="javascript:history.back()" class="return-button" style="text-decoration: none;"> Назад</a>
+        </DIV>
+    </HEADER>
+
+    <SECTION>
+        <DIV class="form_box">
+            <FORM action="index.html">
+                <h2> Регистрация: </h2>
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required><br><br>
+                <label for="email">Почта:</label>
+                <input type="email" id="email" name="email" required><br><br>
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required><br><br>
+                <input type="submit" value="Зарегистрироваться">
+            </FORM>
+
+        </DIV>
+    </SECTION>
+</BODY>

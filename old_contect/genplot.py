@@ -61,7 +61,7 @@ def generate_plot(selected_date_range='all', selected_vendor='all', selected_mod
         percentage_change = f'+{sale_data.iloc[-1]}пт'
 
     # Создание графика
-    fig = px.line(x=sale_data.index, y=sale_data.values, title='Количество контрактов по дате')
+    fig = px.line(x=sale_data.index, y=sale_data.values)
     fig_json = fig.to_json()
 
     return fig_json, round(sale_data.mean()), percentage_change
