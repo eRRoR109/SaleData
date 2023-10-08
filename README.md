@@ -1,7 +1,7 @@
 # SaleData
 indexes - модуль с функциями расчетов индексов;
 
-app - главный flask файл (запускать его для запуска сайта;
+app - главный flask файл (запускать его для запуска сайта);
 
 templates - html файлы (analysis.html - страница с отображением графиков, index.html - главная страница); 
 
@@ -9,3 +9,4 @@ requirements - нужные библиотеки (pip install -r requirements.tx
 
 sale_data - данные; 
 
+oldcontent - папка со старым кодом (вдруг понадобится);
