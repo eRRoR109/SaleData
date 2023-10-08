@@ -9,4 +9,4 @@ requirements - нужные библиотеки (pip install -r requirements.tx
 
 sale_data - данные; 
 
-oldcontent - папка со старым кодом (вдруг понадобится);
+old_content - папка со старым кодом (вдруг понадобится);
