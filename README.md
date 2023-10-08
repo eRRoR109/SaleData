@@ -1,9 +1,9 @@
 # SaleData
-genplot - модуль с постройкой графиков;
+indexes - модуль с функциями расчетов индексов;
 
-app - главный flask файл;
+app - главный flask файл (запускать его для запуска сайта;
 
-templates - html файлы; 
+templates - html файлы (analysis.html - страница с отображением графиков, index.html - главная страница); 
 
 requirements - нужные библиотеки (pip install -r requirements.txt); 
 
