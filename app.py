@@ -32,7 +32,7 @@ def help():
 
 @app.route('/plot', methods=['POST'])  # через эту функцию строятся графики
 def plot():
-    # Сбор данных с формы<
+    # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
     vendor = request.form['vendor']
@@ -46,20 +46,19 @@ def plot():
 
     # Постройка графиков в зависимости от выбранного индекса
     if ind == 'Ins_mov':
-        x = indexes.instant_moving_index_interval(type_, startdate, enddate, dealer, vendor)
-        fig = pe.line(x=x['date'], y=x['index'])
+        data = indexes.instant_moving_index_interval(type_, startdate, enddate, dealer, vendor)
     elif ind == 'Ins_y-y':
-        x = indexes.instant_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
-        fig = pe.line(x=x['date'], y=x['index'])
+        data = indexes.instant_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
     elif ind == 'Cur_mov':
-        x = indexes.current_moving_index_interval(type_, startdate, enddate, dealer, vendor)
-        fig = pe.line(x=x['date'], y=x['index'])
+        data = indexes.current_moving_index_interval(type_, startdate, enddate, dealer, vendor)
     elif ind == 'Cur_y-y':
-        x = indexes.current_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
-        fig = pe.line(x=x['date'], y=x['index'])
+        data = indexes.current_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
+    elif ind == 'Long_mov':
+        data = indexes.long_moving_index_interval(type_, startdate, enddate, dealer, vendor)
     elif ind == 'Long_y-y':
-        x = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
-        fig = pe.line(x=x['date'], y=x['index'])
+        data = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
+
+    fig = pe.line(x=data['date'], y=data['index'])
 
     fig_json = fig.to_json()
     return jsonify({'fig_json': fig_json})

@@ -1,127 +1,69 @@
 import pandas as pd
-from pandas.tseries.offsets import DateOffset
 
 sales = pd.read_csv('./sale_data.csv', index_col=0)
 sales['date'] = pd.to_datetime(sales['date'])
 
 
-# -------------------Мгновенный скользящий--------------------------
-def instant_moving_index(
-        sale_type: str,  # Контракт/Расторжение
-        input_date: str,  # Дата, для которой мы считаем индекс
-        dealer: str = None,  # id дилера
-        vendor: str = None,  # Марка машины
-        model: str = None  # Модель
-) -> float:
-    result_df = sales  # result_df - вспомогательный ДФ, который мы будем получать, фильтруя исходный по параметрам, и по которому будем считать индекс
-    date = pd.to_datetime(input_date)  # перевожу в формат даты
-
-    if dealer is not None:
-        mask_dealer = result_df['dealer'] == dealer  # здесь просто фильтрация по параметрам с помощью масок
-        result_df = result_df[mask_dealer]
-
-    if vendor is not None:
-        mask_vendor = result_df['vendor'] == vendor
-        result_df = result_df[mask_vendor]
-
-    if model is not None:
-        mask_model = result_df['model'] == model
-        result_df = result_df[mask_model]
-
-    mask_sale_type = result_df['sale_type'] == sale_type
-    result_df = result_df[mask_sale_type]
-
-    mask_date = (date - pd.offsets.Day(6) <= result_df['date']) & (result_df['date'] < date)
-    result_df = result_df[mask_date].sort_values('date')
-
-    denominator = result_df[result_df['date'] < date - pd.offsets.Day(3)].shape[0]  # определяю знаменатель индекса
-
-    numerator = result_df[result_df['date'] >= date - pd.offsets.Day(3)].shape[0]  # и числитель
-
-    if denominator == 0:  # здесь всякие предостережения на случай, если знаменатель = 0
-        if numerator == 0:
-            index = 1
-        else:
-            index = numerator
+def _index(numerator, denominator):  # Считает индекс в зависимости от числителя и знаменателя
+    if denominator == 0:
+        index = 100 if numerator != 0 else 0
     else:
-        index = numerator / denominator
+        index = (numerator / denominator - 1) * 100
 
     return index
+
+
+# ---------------Мгновенный-скользящий---------------
+# можно выбирать данные >= 7д начала дф
+def instant_moving_index(result_df, input_date) -> float:  # result_df уже обработанный отсортированный датафрейм
+
+    mask = (result_df['date'] >= input_date - pd.DateOffset(days=6)) & (result_df['date'] < input_date)
+    result_df = result_df[mask]
+
+    numerator = len(result_df[result_df['date'] >= input_date - pd.DateOffset(days=3)])
+    denominator = len(result_df) - numerator
+
+    return _index(numerator, denominator)
 
 
 def instant_moving_index_interval(
         sale_type: str,
-        start_date: str,  # начало временного интервала
-        end_date: str,  # конец временного интервала
+        start_date: str,
+        end_date: str,
         dealer: str = None,
         vendor: str = None,
         model: str = None
 ):
-    instant_moving_index_array = pd.DataFrame(
-        # Определяю датафрейм, к нему буду присоединять с конца индексы по ходу цикла
-        {
-            'date': [],
-            'index': []
-        }
-    )
-    instant_moving_index_array['date'] = pd.to_datetime(instant_moving_index_array['date'])  # перевожу формат на дату
+    mask = (sales['sale_type'] == sale_type)
+    if dealer is not None:
+        mask &= (sales['dealer'] == dealer)
+    if vendor is not None:
+        mask &= (sales['vendor'] == vendor)
+    if model is not None:
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    start_date = pd.to_datetime(start_date)  # здесь тоже
-    end_date = pd.to_datetime(end_date)
-
-    for step_date in pd.date_range(start=start_date, end=end_date):  # и собственно цикл с шаком в 1 день
-        step_index = instant_moving_index(sale_type, step_date, dealer, vendor, model)  # расчёт индекса
-        instant_moving_index_array.loc[len(instant_moving_index_array.index)] = [step_date,
-                                                                                 step_index]  # добавляю его в ДФ
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [instant_moving_index(result_df, step_date) for step_date in date_range]
+    instant_moving_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
     return instant_moving_index_array
 
 
-# ---------------------------Мгновенный год-год--------------------------
-def instant_year_year_index(
-        sale_type: str,
-        input_date: str,
-        dealer: str = None,
-        vendor: str = None,
-        model: str = None) -> float:
-    result_df = sales
-    date = pd.to_datetime(input_date)
+# ---------------Мгновенный-год-год---------------
+# можно выбирать данные >= 1г 4д начала дф
+def instant_year_year_index(result_df, input_date) -> float:
+    mask_current_year = (input_date - pd.DateOffset(days=3) <= result_df['date']) & (result_df['date'] < input_date)
+    result_df_current_year = result_df[mask_current_year]
 
-    if dealer is not None:
-        mask_dealer = result_df['dealer'] == dealer
-        result_df = result_df[mask_dealer]
+    mask_last_year = (input_date - pd.DateOffset(years=1, days=3) <= result_df['date']) & (
+            result_df['date'] < input_date - pd.DateOffset(years=1))
+    result_df_last_year = result_df[mask_last_year]
 
-    if vendor is not None:
-        mask_vendor = result_df['vendor'] == vendor
-        result_df = result_df[mask_vendor]
+    denominator = len(result_df_last_year)
+    numerator = len(result_df_current_year)
 
-    if model is not None:
-        mask_model = result_df['model'] == model
-        result_df = result_df[mask_model]
-
-    mask_sale_type = result_df['sale_type'] == sale_type
-    result_df = result_df[mask_sale_type]
-
-    mask_date_current_year = (date - DateOffset(days=3) <= result_df['date']) & (result_df['date'] < date)
-    result_df_current_year = result_df[mask_date_current_year].sort_values('date')
-
-    mask_date_last_year = (date - DateOffset(years=1, days=3) <= result_df['date']) & (
-            result_df['date'] < date - DateOffset(years=1))
-    result_df_last_year = result_df[mask_date_last_year].sort_values('date')
-
-    denominator = result_df_last_year.shape[0]
-
-    numerator = result_df_current_year.shape[0]
-
-    if denominator == 0:
-        if numerator == 0:
-            index = 1
-        else:
-            index = numerator
-    else:
-        index = numerator / denominator
-
-    return index
+    return _index(numerator, denominator)
 
 
 def instant_year_year_index_interval(
@@ -132,69 +74,32 @@ def instant_year_year_index_interval(
         vendor: str = None,
         model: str = None
 ):
-    instant_year_year_index_df = pd.DataFrame(
-        {
-            'date': [],
-            'index': []
-        }
-    )
-    instant_year_year_index_df['date'] = pd.to_datetime(instant_year_year_index_df['date'])
-
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
-
-    for step_date in pd.date_range(start=start_date, end=end_date):
-        step_index = instant_year_year_index(sale_type, step_date, dealer, vendor, model)
-        instant_year_year_index_df.loc[len(instant_year_year_index_df.index)] = [step_date, step_index]
-
-    return instant_year_year_index_df
-
-
-# -----------Текущий скользящий------------------------------
-def current_moving_index(
-        sale_type: str,
-        input_date: str,
-        dealer: str = None,
-        vendor: str = None,
-        model: str = None) -> float:
-    result_df = sales
-    date = pd.to_datetime(input_date)
-
+    mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
-        mask_dealer = result_df['dealer'] == dealer
-        result_df = result_df[mask_dealer]
-
+        mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask_vendor = result_df['vendor'] == vendor
-        result_df = result_df[mask_vendor]
-
+        mask &= (sales['vendor'] == vendor)
     if model is not None:
-        mask_model = result_df['model'] == model
-        result_df = result_df[mask_model]
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    mask_sale_type = result_df['sale_type'] == sale_type
-    result_df = result_df[mask_sale_type]
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [instant_year_year_index(result_df, step_date) for step_date in date_range]
+    instant_y_y_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
-    mask_date_current_month = (date - DateOffset(months=1) <= result_df['date']) & (result_df['date'] < date)
-    result_df_current_month = result_df[mask_date_current_month].sort_values('date')
+    return instant_y_y_index_array
 
-    mask_date_last_month = (date - DateOffset(months=2) <= result_df['date']) & (
-            result_df['date'] < date - DateOffset(months=1))
-    result_df_last_month = result_df[mask_date_last_month].sort_values('date')
 
-    denominator = result_df_last_month.shape[0]
+# ---------------Текущий-скользящий---------------
+# можно выбирать данные >= 61д начала дф
+def current_moving_index(result_df, input_date) -> float:
+    mask = (input_date - pd.DateOffset(months=2) <= result_df['date']) & (result_df['date'] < input_date)
+    result_df = result_df[mask]
 
-    numerator = result_df_current_month.shape[0]
+    numerator = len(result_df[result_df['date'] >= input_date - pd.DateOffset(months=1)])
+    denominator = len(result_df) - numerator
 
-    if denominator == 0:
-        if numerator == 0:
-            index = 1
-        else:
-            index = numerator
-    else:
-        index = numerator / denominator
-
-    return index
+    return _index(numerator, denominator)
 
 
 def current_moving_index_interval(
@@ -205,69 +110,36 @@ def current_moving_index_interval(
         vendor: str = None,
         model: str = None
 ):
-    current_moving_index_df = pd.DataFrame(
-        {
-            'date': [],
-            'index': []
-        }
-    )
-    current_moving_index_df['date'] = pd.to_datetime(current_moving_index_df['date'])
-
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
-
-    for step_date in pd.date_range(start=start_date, end=end_date):
-        step_index = current_moving_index(sale_type, step_date, dealer, vendor, model)
-        current_moving_index_df.loc[len(current_moving_index_df.index)] = [step_date, step_index]
-
-    return current_moving_index_df
-
-
-# --------------------Текущий год-год------------------------------
-def current_year_year_index(
-        sale_type: str,
-        input_date: str,
-        dealer: str = None,
-        vendor: str = None,
-        model: str = None) -> float:
-    result_df = sales
-    date = pd.to_datetime(input_date)
-
+    mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
-        mask_dealer = result_df['dealer'] == dealer
-        result_df = result_df[mask_dealer]
-
+        mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask_vendor = result_df['vendor'] == vendor
-        result_df = result_df[mask_vendor]
-
+        mask &= (sales['vendor'] == vendor)
     if model is not None:
-        mask_model = result_df['model'] == model
-        result_df = result_df[mask_model]
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    mask_sale_type = result_df['sale_type'] == sale_type
-    result_df = result_df[mask_sale_type]
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [current_moving_index(result_df, step_date) for step_date in date_range]
+    current_moving_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
-    mask_date_current_month = (date - DateOffset(months=1) <= result_df['date']) & (result_df['date'] < date)
-    result_df_current_month = result_df[mask_date_current_month].sort_values('date')
+    return current_moving_index_array
 
-    mask_date_last_year_month = (date - DateOffset(years=1, months=1) <= result_df['date']) & (
-            result_df['date'] < date - DateOffset(years=1))
-    result_df_last_year_month = result_df[mask_date_last_year_month].sort_values('date')
 
-    denominator = result_df_last_year_month.shape[0]
+# ---------------Текущий-год-год---------------
+# можно выбирать данные >= 1г 1м
+def current_year_year_index(result_df, input_date) -> float:
+    mask_current_month = (input_date - pd.DateOffset(months=1) <= result_df['date']) & (result_df['date'] < input_date)
+    result_df_current_month = result_df[mask_current_month]
 
-    numerator = result_df_current_month.shape[0]
+    mask_last_year_month = (input_date - pd.DateOffset(years=1, months=1) <= result_df['date']) & (
+            result_df['date'] < input_date - pd.DateOffset(years=1))
+    result_df_last_year_month = result_df[mask_last_year_month]
 
-    if denominator == 0:
-        if numerator == 0:
-            index = 1
-        else:
-            index = numerator
-    else:
-        index = numerator / denominator
+    denominator = len(result_df_last_year_month)
+    numerator = len(result_df_current_month)
 
-    return index
+    return _index(numerator, denominator)
 
 
 def current_year_year_index_interval(
@@ -278,70 +150,72 @@ def current_year_year_index_interval(
         vendor: str = None,
         model: str = None
 ):
-    current_year_year_index_df = pd.DataFrame(
-        {
-            'date': [],
-            'index': []
-        }
-    )
-    current_year_year_index_df['date'] = pd.to_datetime(current_year_year_index_df['date'])
+    mask = (sales['sale_type'] == sale_type)
+    if dealer is not None:
+        mask &= (sales['dealer'] == dealer)
+    if vendor is not None:
+        mask &= (sales['vendor'] == vendor)
+    if model is not None:
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [current_year_year_index(result_df, step_date) for step_date in date_range]
+    current_y_y_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
-    for step_date in pd.date_range(start=start_date, end=end_date):
-        step_index = current_year_year_index(sale_type, step_date, dealer, vendor, model)
-        current_year_year_index_df.loc[len(current_year_year_index_df.index)] = [step_date, step_index]
-
-    return current_year_year_index_df
+    return current_y_y_index_array
 
 
-# -------------------Длинный год-год--------------------
-def long_year_year_index(
+# ---------------Длинный-скользящий---------------
+# можно выбирать данные >= 2г 1д начала дф
+def long_moving_index(result_df, input_date) -> float:
+    mask = (input_date - pd.DateOffset(years=2) <= result_df['date']) & (result_df['date'] < input_date)
+    result_df = result_df[mask]
+
+    numerator = len(result_df[result_df['date'] >= input_date - pd.DateOffset(years=1)])
+    denominator = len(result_df) - numerator
+
+    return _index(numerator, denominator)
+
+
+def long_moving_index_interval(
         sale_type: str,
-        input_date: str,
+        start_date: str,
+        end_date: str,
         dealer: str = None,
         vendor: str = None,
-        model: str = None) -> float:
-    result_df = sales
-    date = pd.to_datetime(input_date)
-
+        model: str = None
+):
+    mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
-        mask_dealer = result_df['dealer'] == dealer
-        result_df = result_df[mask_dealer]
-
+        mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask_vendor = result_df['vendor'] == vendor
-        result_df = result_df[mask_vendor]
-
+        mask &= (sales['vendor'] == vendor)
     if model is not None:
-        mask_model = result_df['model'] == model
-        result_df = result_df[mask_model]
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    mask_sale_type = result_df['sale_type'] == sale_type
-    result_df = result_df[mask_sale_type]
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [long_moving_index(result_df, step_date) for step_date in date_range]
+    long_moving_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
-    mask_date_this_year = (date - DateOffset(months=date.month - 1, days=date.day - 1) <= result_df['date']) & (
-            result_df['date'] < date)
-    result_df_this_year = result_df[mask_date_this_year].sort_values('date')
+    return long_moving_index_array
 
-    mask_date_last_year = (date - DateOffset(years=1, months=date.month - 1, days=date.day - 1) <= result_df[
-        'date']) & (result_df['date'] < date - DateOffset(years=1))
-    result_df_last_year = result_df[mask_date_last_year].sort_values('date')
 
-    denominator = result_df_last_year.shape[0]
+# ---------------Длинный-год-год---------------
+def long_year_year_index(result_df, input_date) -> float:
+    mask_this_year = (input_date - pd.DateOffset(months=input_date.month - 1, days=input_date.day - 1) <=
+                      result_df['date']) & (result_df['date'] < input_date)
+    result_df_this_year = result_df[mask_this_year]
 
-    numerator = result_df_this_year.shape[0]
+    mask_last_year = (input_date - pd.DateOffset(years=1, months=input_date.month - 1, days=input_date.day - 1) <=
+                      result_df['date']) & (result_df['date'] < input_date - pd.DateOffset(years=1))
+    result_df_last_year = result_df[mask_last_year]
 
-    if denominator == 0:
-        if numerator == 0:
-            index = 1
-        else:
-            index = numerator
-    else:
-        index = numerator / denominator
+    denominator = len(result_df_last_year)
+    numerator = len(result_df_this_year)
 
-    return index
+    return _index(numerator, denominator)
 
 
 def long_year_year_index_interval(
@@ -352,19 +226,17 @@ def long_year_year_index_interval(
         vendor: str = None,
         model: str = None
 ):
-    long_year_year_index_df = pd.DataFrame(
-        {
-            'date': [],
-            'index': []
-        }
-    )
-    long_year_year_index_df['date'] = pd.to_datetime(long_year_year_index_df['date'])
+    mask = (sales['sale_type'] == sale_type)
+    if dealer is not None:
+        mask &= (sales['dealer'] == dealer)
+    if vendor is not None:
+        mask &= (sales['vendor'] == vendor)
+    if model is not None:
+        mask &= (sales['model'] == model)
+    result_df = sales[mask]
 
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
+    date_range = pd.date_range(start=start_date, end=end_date)
+    index_values = [long_year_year_index(result_df, step_date) for step_date in date_range]
+    long_y_y_index_array = pd.DataFrame({'date': date_range, 'index': index_values})
 
-    for step_date in pd.date_range(start=start_date, end=end_date):
-        step_index = long_year_year_index(sale_type, step_date, dealer, vendor, model)
-        long_year_year_index_df.loc[len(long_year_year_index_df.index)] = [step_date, step_index]
-
-    return long_year_year_index_df
+    return long_y_y_index_array
