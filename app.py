@@ -17,21 +17,11 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Авторизуйтесь для полного доступа к функционалу сайта'
 
 
-# Функция для установления соединения с базой данных
+# Функция для установления соединения с базой данных (sqlite)
 def connect_db():
     conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
-
-
-# Функция для инициализации базы данных (создание таблицы, если она не существует)
-def init_db():
-    with app.app_context():
-        conn = connect_db()
-        with app.open_resource('sq_db.sql', mode='r') as f:
-            conn.cursor().executescript(f.read())
-        conn.commit()
-        conn.close()
 
 
 def get_db():
@@ -43,6 +33,7 @@ def get_db():
 
 @login_manager.user_loader
 def load_user(user_id):
+    # Загрузка пользователя в текущей сессии
     db = get_db()
     dbase = IDAtaBase(db)
     return UserLogin().fromDB(user_id, dbase)
@@ -64,14 +55,15 @@ def login():
     if request.method == 'POST':
         db = get_db()
         dbase = IDAtaBase(db)
-        user = dbase.getUserByEmail(request.form['email'])
-        if user and check_password_hash(user['password'], request.form['psw']):
+        user = dbase.getUserByEmail(request.form['email'])  # получаем данные пользователя из бд по введенной почте
+        if user and check_password_hash(user['password'],
+                                        request.form['psw']):  # если совпал пароль и данные в бд не пустые
             userlogin = UserLogin().create(user)
-            rm = True if request.form.get('remainme') else False
+            rm = True if request.form.get('remainme') else False  # чекбокс запомнить меня
             login_user(userlogin, remember=rm)
-            return redirect(url_for('analysis'))
+            return redirect(url_for('analysis'))  # в случае если все правильго перенаправляем на /analysis
 
-        flash("Неверная почта/пароль")
+        flash("Неверная почта/пароль")  # Сообщение пользователю при неправильном вводе
 
     return render_template('login.html')
 
@@ -79,6 +71,7 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    # функция выхода из аккаунта
     logout_user()
     return redirect(url_for('login'))
 
@@ -88,9 +81,11 @@ def registration():
     db = get_db()
     dbase = IDAtaBase(db)
     if request.method == 'POST':
+        # Проверки что login > 1 знака, почта > 5, пароль > 5
         if len(request.form['login']) > 1 and len(request.form['email']) > 5 and len(request.form['psw']) > 5:
-            hash = generate_password_hash(request.form['psw'])
-            res = dbase.addUser(request.form['login'], request.form['email'], hash)
+            hash_ = generate_password_hash(request.form['psw'])  # кодируем пароль пользователя для безопасности
+            # добавление пользователя в бд
+            res = dbase.addUser(request.form['login'], request.form['email'], hash_)
             if res:
                 flash("Вы успешно зарегистрировались")
                 return redirect(url_for('login'))
@@ -102,13 +97,14 @@ def registration():
     return render_template('registration.html')
 
 
+# марки
 # TODO сделать в качестве словаря: {'марка': ['модель', 'модель']}
 vendors = ['Audi', 'SUZUKI', 'SsangYong',
            'Hyundai']  # TODO сделать чтобы подгружалось из excel (чтобы пользователю было удобно добавлять новые марки)
 
 
 @app.route('/help')  # Страница "about"
-def help():
+def help_():
     return render_template('help.html')
 
 
@@ -118,7 +114,7 @@ def analysis():
     if current_user.type_ == 'v':  # Если сторонний пользователь
         return render_template('analysis.html', vendors=vendors)
     else:
-        return render_template('analysis_d.html', vendors=vendors)
+        return render_template('analysis_d.html', vendors=vendors)  # страница если авторизирован дилер
 
 
 @app.route('/plot', methods=['POST'])  # через эту функцию строятся графики
@@ -149,13 +145,16 @@ def plot():
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График индексов общего рынка'))
+    fig.update_xaxes(title_text='Дата')
+    fig.update_yaxes(title_text='Индекс%')
+    fig.update_layout(legend=dict(x=0.5, y=1.1, traceorder='normal', orientation='h'))
 
     fig_json = fig.to_json()
     return jsonify({'fig_json': fig_json})
 
 
 @app.route('/compare', methods=['POST'])
-def compare():
+def compare():  # сравнение графиков
     # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
@@ -182,12 +181,10 @@ def compare():
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График сравнения'))
-    fig.update_layout(
-        legend=dict(
-            x=-10,  # Указывает позицию по горизонтали (1 = крайнее правое положение)
-            y=1,  # Указывает позицию по вертикали (1 = крайнее верхнее положение)
-        )
-    )
+    fig.update_xaxes(title_text='Дата')
+    fig.update_yaxes(title_text='Индекс%')
+    fig.update_layout(legend=dict(x=0.5, y=1.1, traceorder='normal', orientation='h'))
+
     fig_json = fig.to_json()
 
     return jsonify({'fig_json': fig_json})
