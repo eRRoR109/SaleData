@@ -30,7 +30,7 @@ def instant_moving_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):
@@ -70,7 +70,7 @@ def instant_year_year_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):
@@ -106,7 +106,7 @@ def current_moving_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):
@@ -146,7 +146,7 @@ def current_year_year_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):
@@ -182,7 +182,7 @@ def long_moving_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):
@@ -222,7 +222,7 @@ def long_year_year_index_interval(
         sale_type: str,
         start_date: str,
         end_date: str,
-        dealer: str = None,
+        dealer: int = None,
         vendor: str = None,
         model: str = None
 ):

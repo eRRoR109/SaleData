@@ -102,20 +102,22 @@
             <a href="javascript:history.back()" class="return-button" style="text-decoration: none;"> Назад</a>
         </DIV>
     </HEADER>
-
+    {% for msg in get_flashed_messages() %}
+    <div>{{msg}}</div>
+    {% endfor %}
     <SECTION>
         <DIV class="form_box">
-            <FORM action="index.html">
+            <FORM action="reg" method="post">
                 <h2> Регистрация: </h2>
-                <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" required><br><br>
+                <label for="login">Имя пользователя:</label>
+                <input type="text" id="login" name="login" required><br><br>
                 <label for="email">Почта:</label>
                 <input type="email" id="email" name="email" required><br><br>
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required><br><br>
+                <label for="psw">Пароль:</label>
+                <input type="password" id="psw" name="psw" required><br><br>
                 <input type="submit" value="Зарегистрироваться">
             </FORM>
-
+            {{test}}
         </DIV>
     </SECTION>
 </BODY>

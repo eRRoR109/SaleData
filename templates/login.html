@@ -103,20 +103,22 @@
         </DIV>
     </HEADER>
 
+    {% for msg in get_flashed_messages() %}
+    <div>{{msg}}</div>
+    {% endfor %}
     <SECTION>
         <DIV class="form_box">
-            <FORM action="index.html">
+            <FORM action="login" method="post">
                 <h2> Вход: </h2>
                 <LABEL for="email">Почта:</LABEL>
                 <INPUT type="email" id="email" name="email" required><br><br>
-                <LABEL for="password">Пароль:</LABEL>
-                <INPUT type="password" id="password" name="password" required>
+                <LABEL for="psw">Пароль:</LABEL>
+                <INPUT type="password" id="psw" name="psw" required>
                 <DIV class="forget">
                         <LABEL for="">
                             <br>
-                            <INPUT type="checkbox"> Запомнить меня
+                            <INPUT type="checkbox" name="remainme"> Запомнить меня
                             <br><br>
-                            <a href="#"> Забыл пароль...</a>
                         </LABEL>
                 </DIV>
                 <DIV class="register">

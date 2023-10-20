@@ -5,7 +5,6 @@
     <META name="viewport" content="width=device-width, initial-scale=1.0">
     <TITLE>DDSale</TITLE>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <LINK rel="shortcut icon" href="DR.png" type="image/png">
     <STYLE>
         body {
             font-family: Times New Roman, sans-serif;
@@ -133,13 +132,16 @@
             {% endfor %}
         </select>
 
+
         <label for="startdate">Дата начала:</label>
         <input type="date" id="startdate" name="startdate">
         <label for="enddate">Дата конца:</label>
         <input type="date" id="enddate" name="enddate">
         <input type="submit" value="Показать">
     </form>
+        <button id="compareButton">Сравнить</button>
     </DIV>
+
 
     <div id="plotly_chart"></div>
 
@@ -147,6 +149,7 @@
         document.getElementById('filterForm').addEventListener('submit', function(event) {
             event.preventDefault();
             var formData = new FormData(this);
+            compareButton.disabled = false;
             fetch('/plot', {
                 method: 'POST',
                 body: formData
@@ -158,6 +161,23 @@
 
             });
         });
+
+        document.getElementById('compareButton').addEventListener('click', function(event) {
+    event.preventDefault();
+    var formData = new FormData(document.getElementById('filterForm'));
+    this.disabled = true; // Заблокировать кнопку
+    fetch('/compare', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        var plotlyChart = document.getElementById('plotly_chart');
+        var newFigure = JSON.parse(data.fig_json);
+        Plotly.addTraces(plotlyChart, newFigure.data);
+    });
+});
+
     </script>
 </BODY>
 </html>
