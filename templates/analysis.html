@@ -126,7 +126,7 @@
         </select>
 
         <label for="vendor">Марка:</label>
-        <select id="vendor" name="vendor">
+        <select id="vendor" name="vendor" multiple>
             <option value="all_v">Все</option>
             {% for option in vendors %}
             <option value="{{ option }}">{{ option }}</option>

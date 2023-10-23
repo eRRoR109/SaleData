@@ -2,7 +2,8 @@ import pandas as pd
 
 sales = pd.read_csv('./sale_data.csv', index_col=0)
 sales['date'] = pd.to_datetime(sales['date'])
-
+uniq_v = sales['vendor'].unique() # все марки
+items = {uniq_v[i]: list(sales.loc[sales['vendor'] == uniq_v[i], 'model'].unique()) for i in range(len(uniq_v))}
 
 def _index(numerator, denominator):  # Считает индекс в зависимости от числителя и знаменателя
     if denominator == 0:
@@ -31,16 +32,16 @@ def instant_moving_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)
@@ -71,16 +72,16 @@ def instant_year_year_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)
@@ -107,16 +108,16 @@ def current_moving_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)
@@ -147,16 +148,16 @@ def current_year_year_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)
@@ -183,16 +184,16 @@ def long_moving_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)
@@ -223,16 +224,16 @@ def long_year_year_index_interval(
         start_date: str,
         end_date: str,
         dealer: int = None,
-        vendor: str = None,
-        model: str = None
+        vendor: list = None,
+        model: list = None
 ):
     mask = (sales['sale_type'] == sale_type)
     if dealer is not None:
         mask &= (sales['dealer'] == dealer)
     if vendor is not None:
-        mask &= (sales['vendor'] == vendor)
+        mask &= (sales['vendor'].isin(vendor))
     if model is not None:
-        mask &= (sales['model'] == model)
+        mask &= (sales['model'].isin(model))
     result_df = sales[mask]
 
     date_range = pd.date_range(start=start_date, end=end_date)

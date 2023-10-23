@@ -96,12 +96,7 @@ def registration():
 
     return render_template('registration.html')
 
-
-# марки
-# TODO сделать в качестве словаря: {'марка': ['модель', 'модель']}
-vendors = ['Audi', 'SUZUKI', 'SsangYong',
-           'Hyundai']  # TODO сделать чтобы подгружалось из excel (чтобы пользователю было удобно добавлять новые марки)
-
+vendors = indexes.items.keys()
 
 @app.route('/help')  # Страница "about"
 def help_():
@@ -122,8 +117,8 @@ def plot():
     # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
-    vendor = request.form['vendor']
-    if vendor == 'all_v':
+    vendor = request.form.getlist('vendor')
+    if vendor == ['all_v']:
         vendor = None
     dealer = None
     startdate = request.form['startdate']
@@ -158,9 +153,7 @@ def compare():  # сравнение графиков
     # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
-    vendor = request.form['vendor']
-    if vendor == 'all_v':
-        vendor = None
+    vendor = None
     dealer = int(current_user.type_[1:])
     startdate = request.form['startdate']
     enddate = request.form['enddate']
@@ -180,7 +173,7 @@ def compare():  # сравнение графиков
         data = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График сравнения'))
+    fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График вашего индекса'))
     fig.update_xaxes(title_text='Дата')
     fig.update_yaxes(title_text='Индекс%')
     fig.update_layout(legend=dict(x=0.5, y=1.1, traceorder='normal', orientation='h'))
