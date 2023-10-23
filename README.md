@@ -19,3 +19,5 @@ requirements - нужные библиотеки (pip install -r requirements.tx
 
 Необходимая версия python - 3.11 и выше
 (https://www.python.org/downloads/release/python-3112/)
+
+В проекте используется: flask·sqlite·plotly
