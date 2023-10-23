@@ -133,6 +133,12 @@
             {% endfor %}
         </select>
 
+        <label for="model">Модель:</label>
+        <select id="model" name="model" multiple>
+            <option value="all_m"Все</option>
+        </select>
+
+
         <label for="startdate">Дата начала:</label>
         <input type="date" id="startdate" name="startdate">
         <label for="enddate">Дата конца:</label>
@@ -158,6 +164,28 @@
 
             });
         });
-    </script>
+
+        document.getElementById('vendor').addEventListener('change', function() {
+        var vendor = this.value;
+        var modelSelect = document.getElementById('model');
+        modelSelect.innerHTML = "";
+
+        var allModelsOption = document.createElement('option');
+        allModelsOption.value = 'all_m';
+        allModelsOption.text = 'Все';
+        modelSelect.add(allModelsOption);
+
+        if (vendor !== 'all_v') {
+            var models = JSON.parse('{{ data | tojson | safe }}')[vendor];
+            for (var i = 0; i < models.length; i++) {
+                var option = document.createElement('option');
+                option.value = models[i];
+                option.text = models[i];
+                modelSelect.add(option);
+            }
+        }
+    });
+
+</script>
 </BODY>
 </html>

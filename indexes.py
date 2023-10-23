@@ -2,8 +2,9 @@ import pandas as pd
 
 sales = pd.read_csv('./sale_data.csv', index_col=0)
 sales['date'] = pd.to_datetime(sales['date'])
-uniq_v = sales['vendor'].unique() # все марки
+uniq_v = sales['vendor'].unique()  # все марки
 items = {uniq_v[i]: list(sales.loc[sales['vendor'] == uniq_v[i], 'model'].unique()) for i in range(len(uniq_v))}
+
 
 def _index(numerator, denominator):  # Считает индекс в зависимости от числителя и знаменателя
     if denominator == 0:
