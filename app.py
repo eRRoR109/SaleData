@@ -97,24 +97,22 @@ def registration():
     return render_template('registration.html')
 
 
-# марки
-# TODO сделать в качестве словаря: {'марка': ['модель', 'модель']}
-vendors = ['Audi', 'SUZUKI', 'SsangYong',
-           'Hyundai']  # TODO сделать чтобы подгружалось из excel (чтобы пользователю было удобно добавлять новые марки)
-
-
 @app.route('/help')  # Страница "about"
 def help_():
     return render_template('help.html')
+
+
+data = indexes.items
+vendors = list(data.keys())
 
 
 @app.route('/analysis')  # Страница с графиками/данными
 @login_required
 def analysis():
     if current_user.type_ == 'v':  # Если сторонний пользователь
-        return render_template('analysis.html', vendors=vendors)
+        return render_template('analysis.html', vendors=vendors, data=data)
     else:
-        return render_template('analysis_d.html', vendors=vendors)  # страница если авторизирован дилер
+        return render_template('analysis_d.html', vendors=vendors, data=data)  # страница если авторизирован дилер
 
 
 @app.route('/plot', methods=['POST'])  # через эту функцию строятся графики
@@ -122,26 +120,29 @@ def plot():
     # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
-    vendor = request.form['vendor']
-    if vendor == 'all_v':
+    vendor = request.form.getlist('vendor')
+    if vendor == ['all_v']:
         vendor = None
     dealer = None
+    model = request.form.getlist('model')
+    if model == [] or model == ['all_m']:
+        model = None
     startdate = request.form['startdate']
     enddate = request.form['enddate']
 
     # Постройка графиков в зависимости от выбранного индекса
     if ind == 'Ins_mov':
-        data = indexes.instant_moving_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.instant_moving_index_interval(type_, startdate, enddate, dealer, vendor, model)
     elif ind == 'Ins_y-y':
-        data = indexes.instant_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.instant_year_year_index_interval(type_, startdate, enddate, dealer, vendor, model)
     elif ind == 'Cur_mov':
-        data = indexes.current_moving_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.current_moving_index_interval(type_, startdate, enddate, dealer, vendor, model)
     elif ind == 'Cur_y-y':
-        data = indexes.current_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.current_year_year_index_interval(type_, startdate, enddate, dealer, vendor, model)
     elif ind == 'Long_mov':
-        data = indexes.long_moving_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.long_moving_index_interval(type_, startdate, enddate, dealer, vendor, model)
     elif ind == 'Long_y-y':
-        data = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
+        data = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor, model)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График индексов общего рынка'))
@@ -158,9 +159,7 @@ def compare():  # сравнение графиков
     # Сбор данных с формы
     ind = request.form['ind']
     type_ = request.form['type']
-    vendor = request.form['vendor']
-    if vendor == 'all_v':
-        vendor = None
+    vendor = None
     dealer = int(current_user.type_[1:])
     startdate = request.form['startdate']
     enddate = request.form['enddate']
@@ -180,7 +179,7 @@ def compare():  # сравнение графиков
         data = indexes.long_year_year_index_interval(type_, startdate, enddate, dealer, vendor)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График сравнения'))
+    fig.add_trace(go.Scatter(x=data['date'], y=data['index'], name='График вашего индекса'))
     fig.update_xaxes(title_text='Дата')
     fig.update_yaxes(title_text='Индекс%')
     fig.update_layout(legend=dict(x=0.5, y=1.1, traceorder='normal', orientation='h'))
