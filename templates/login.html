@@ -62,13 +62,18 @@
 
         .form_box {
             position: relative;
+            text-align: center;
             width: 350px;
             height: 400px;
             background: #00c4ff;
             border: 3px solid #7a7b7e;
             display: flex;
             justify-content: center;
-            align-items: center;
+        }
+
+        .input {
+            text-align: right;
+            font-family: Times New Roman, sans-serif;
         }
 
         .register {
@@ -109,11 +114,14 @@
     <SECTION>
         <DIV class="form_box">
             <FORM action="login" method="post">
-                <h2> Вход: </h2>
-                <LABEL for="email">Почта:</LABEL>
-                <INPUT type="email" id="email" name="email" required><br><br>
-                <LABEL for="psw">Пароль:</LABEL>
-                <INPUT type="password" id="psw" name="psw" required>
+                <h1> Вход: </h1>
+                <br>
+                <DIV class="input">
+                    <LABEL for="email">Почта:</LABEL>
+                    <INPUT type="email" id="email" name="email" required><br><br>
+                    <LABEL for="psw">Пароль:</LABEL>
+                    <INPUT type="password" id="psw" name="psw" required>
+                </DIV>
                 <DIV class="forget">
                         <LABEL for="">
                             <br>
@@ -125,7 +133,7 @@
                     <p><a href="reg"> Создать новый аккаунт</a></p>
                 </DIV>
                 <br>
-                <INPUT type="submit" value="Войти">
+                <INPUT type="submit" name="submit" value="Войти">
             </FORM>
 
         </DIV>
